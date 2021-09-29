@@ -5,6 +5,9 @@
 #include <serial/serial.h>
 #include <RawJ1939.h>
 
+#include <cmath>
+#include <cstdint>
+
 #pragma once
 
 using namespace std;
@@ -17,19 +20,21 @@ private:
    USESYS_bringup::RawJ1939_msg BMS_DATA;
    int Address;
 
+   std::string port;
+   int32_t baudrate;
    bool need_update_bms_data;
    double last_bms_data_time;
 
 public:
-   USESYS_bringup(std::string comport) {
-      this->init_usesys(comport);
+   USESYS_bringup(std::string port) {
+      this->init_usesys(port);
       this->Address = 0;
    }
 
-   void init_usesys(std::string comport);
-   void usesys_callback(unsigned char request);
-   void read_usesys(std::vector<unsigned char>* return_buffer, int byte_size);
-   void update_usesys(std::vector<unsigned char>* Response);
+   void init_usesys(std::string port); // 初始化通訊
+   void request_usesys(unsigned char req); // 訪問訊息
+   void read_usesys(std::vector<unsigned char>* return_buffer, int byte_size); // 解析回傳訊息
+   void update_usesys(std::vector<unsigned char>* Response); // 更新至rostopic msgs
 
    // 建立ROS topic
 private:
@@ -39,7 +44,6 @@ private:
 
 
 };
-
 
 void Error_Handler(string error_result) {
    ROS_ERROR_STREAM(error_result);
